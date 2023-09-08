@@ -22,7 +22,8 @@ func InitConfig() {
 	// We provide a flat map with the "." delimiter.
 	// A nested map can be loaded by setting the delimiter to an empty string "".
 	k.Load(confmap.Provider(map[string]interface{}{
-		"mainBranch": "main",
+		"mainBranch":   "main",
+		"branchPrefix": "username/pr-",
 	}, "."), nil)
 
 	projectRoot, err := Run(exec.Command("git", "rev-parse", "--show-toplevel"))
