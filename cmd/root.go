@@ -87,7 +87,7 @@ var rootCmd = &cobra.Command{
 					baseBranch = lastBranch
 				}
 
-				out, err := Run(exec.Command("gh", "pr", "create", "-H", branch, "-B", baseBranch, "--fill-first"))
+				out, err := run(exec.Command("gh", "pr", "create", "-H", branch, "-B", baseBranch, "--fill-first"))
 				if err != nil {
 					slog.Error("Failed to create PR", "output", out, "err", err)
 					os.Exit(1)
@@ -113,7 +113,7 @@ var rootCmd = &cobra.Command{
 				}
 			}
 
-			if out, err := Run(exec.Command("gh", "pr", "edit", fmt.Sprint(prNum), "-b", desc+"\n"+prInfo)); err == nil {
+			if out, err := run(exec.Command("gh", "pr", "edit", fmt.Sprint(prNum), "-b", desc+"\n"+prInfo)); err == nil {
 				fmt.Println("Successfully updated PR:", out)
 			}
 		}
@@ -136,7 +136,7 @@ func initConfig() {
 		"branchPrefix": "username/pr-",
 	}, "."), nil)
 
-	projectRoot, err := Run(exec.Command("git", "rev-parse", "--show-toplevel"))
+	projectRoot, err := run(exec.Command("git", "rev-parse", "--show-toplevel"))
 	if err != nil {
 		slog.Error("Not in a git repo", "err", err)
 		os.Exit(1)
@@ -161,18 +161,12 @@ func initConfig() {
 	mainBranch = k.MustString("mainBranch")
 }
 
-func Run(cmd *exec.Cmd) (string, error) {
-	out, err := cmd.CombinedOutput()
-	ret := strings.TrimRight(string(out), "\n")
-	return ret, err
-}
-
 func getStackChangeIDs() ([]string, error) {
 	return getChangeIDs(fmt.Sprintf("%s..@-", mainBranch))
 }
 
 func getDescription(changeID string) (string, error) {
-	return Run(exec.Command(
+	return run(exec.Command(
 		"jj", "log", "--no-graph",
 		"-T", `description`,
 		"-r", changeID,
@@ -180,7 +174,7 @@ func getDescription(changeID string) (string, error) {
 }
 
 func getBranch(changeID string) (string, error) {
-	out, err := Run(exec.Command(
+	out, err := run(exec.Command(
 		"jj", "branch", "list",
 		"-r", changeID,
 	))
@@ -192,7 +186,7 @@ func getBranch(changeID string) (string, error) {
 
 func getNextAvailablePRNumber() (int, error) {
 	cmd := "gh pr list -L 1 --state all --json number | jq '.[0].number'"
-	out, err := Run(exec.Command("bash", "-c", cmd))
+	out, err := run(exec.Command("bash", "-c", cmd))
 	if err != nil {
 		return -1, fmt.Errorf("output: %s, err: %v", out, err)
 	}
@@ -211,7 +205,7 @@ func getNextAvailablePRNumber() (int, error) {
 func createBranch(changeID string, nextPRNum int) (string, error) {
 	branchName := fmt.Sprintf("cwc/pr-%d", nextPRNum)
 
-	out, err := Run(exec.Command("jj", "branch", "create", "-r", changeID, branchName))
+	out, err := run(exec.Command("jj", "branch", "create", "-r", changeID, branchName))
 	if err != nil {
 		return "", fmt.Errorf("output: %s, err: %v", out, err)
 	}
@@ -221,7 +215,7 @@ func createBranch(changeID string, nextPRNum int) (string, error) {
 
 func getPRNumber(branch string) (int, error) {
 	cmd := fmt.Sprintf("gh pr list -L 1 --state all --json number --head %s | jq '.[0].number'", branch)
-	out, err := Run(exec.Command("bash", "-c", cmd))
+	out, err := run(exec.Command("bash", "-c", cmd))
 	if err != nil {
 		return -1, err
 	}
