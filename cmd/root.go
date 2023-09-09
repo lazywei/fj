@@ -203,7 +203,7 @@ func getNextAvailablePRNumber() (int, error) {
 }
 
 func createBranch(changeID string, nextPRNum int) (string, error) {
-	branchName := fmt.Sprintf("cwc/pr-%d", nextPRNum)
+	branchName := fmt.Sprintf("%s%d", k.MustString("branchPrefix"), nextPRNum)
 
 	out, err := run(exec.Command("jj", "branch", "create", "-r", changeID, branchName))
 	if err != nil {
