@@ -104,13 +104,18 @@ var rootCmd = &cobra.Command{
 		for i, prNum := range prStack {
 			desc := descriptions[i]
 
-			prInfo := "\n---"
-			for j := len(prStack) - 1; j >= 0; j-- {
-				if i == j {
-					prInfo += fmt.Sprintf("\n* **->** #%d", prStack[j])
-				} else {
-					prInfo += fmt.Sprintf("\n* #%d", prStack[j])
+			var prInfo string
+			if len(prStack) > 1 {
+				prInfo = "\n---"
+				for j := len(prStack) - 1; j >= 0; j-- {
+					if i == j {
+						prInfo += fmt.Sprintf("\n* **->** #%d", prStack[j])
+					} else {
+						prInfo += fmt.Sprintf("\n* #%d", prStack[j])
+					}
 				}
+			} else {
+				prInfo = ""
 			}
 
 			if out, err := run(exec.Command("gh", "pr", "edit", fmt.Sprint(prNum), "-b", desc+"\n"+prInfo)); err == nil {
