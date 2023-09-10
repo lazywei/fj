@@ -17,8 +17,10 @@ import (
 )
 
 var (
-	k          = *koanf.New(".")
-	mainBranch string
+	k = *koanf.New(".")
+
+	createDraftPR bool
+	mainBranch    string
 )
 
 var rootCmd = &cobra.Command{
@@ -87,7 +89,11 @@ var rootCmd = &cobra.Command{
 					baseBranch = lastBranch
 				}
 
-				out, err := run(exec.Command("gh", "pr", "create", "-H", branch, "-B", baseBranch, "--fill-first"))
+				args := []string{"pr", "create", "-H", branch, "-B", baseBranch, "--fill-first"}
+				if createDraftPR {
+					args = append(args, "--draft")
+				}
+				out, err := run(exec.Command("gh", args...))
 				if err != nil {
 					slog.Error("Failed to create PR", "output", out, "err", err)
 					os.Exit(1)
@@ -139,6 +145,7 @@ func initConfig() {
 	k.Load(confmap.Provider(map[string]interface{}{
 		"mainBranch":   "main",
 		"branchPrefix": "username/pr-",
+		"draft":        true,
 	}, "."), nil)
 
 	projectRoot, err := run(exec.Command("git", "rev-parse", "--show-toplevel"))
@@ -164,6 +171,9 @@ func initConfig() {
 	}
 
 	mainBranch = k.MustString("mainBranch")
+	if k.Bool("draft") {
+		createDraftPR = true
+	}
 }
 
 func getStackChangeIDs() ([]string, error) {
