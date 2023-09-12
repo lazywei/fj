@@ -14,3 +14,4 @@ go install github.com/lazywei/fj@latest
 - `fj up` will run `jj git fetch` and `jj rebase -d main` and drop empty commits due to rebase
 
 TODO: Insert demo recording here
+Another new stuff here
