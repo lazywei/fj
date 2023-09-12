@@ -12,3 +12,5 @@ go install github.com/lazywei/fj@latest
 
 - `fj` will create branch for each stacked commits, submit, and create PR
 - `fj up` will run `jj git fetch` and `jj rebase -d main` and drop empty commits due to rebase
+
+TODO: Insert demo recording here
